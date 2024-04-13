@@ -4,6 +4,9 @@
   "description": "What If Books is a collection for imaginary works of art.",
   "main": "index.js",
   "scripts": {
+    "build": "npx tsc",
+    "start": "node app.js",
+    "dev": "nodemon app.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
