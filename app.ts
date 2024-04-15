@@ -6,7 +6,7 @@ dotenv.config();
 
 const app = express();
 const port = process.env.PORT || 3000;
-const prisma = new PrismaClient();
+export const prisma = new PrismaClient();
 
 const main = async () => {
   const user = await prisma.user.create({
