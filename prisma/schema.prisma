@@ -16,37 +16,37 @@ datasource db {
 model User {
   id            String   @id @default(uuid())
   createdAt     DateTime @default(now())
-  updatedAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
   email         String   @unique
   username      String   @unique
   firstName     String
   lastName      String
   password      String
-  avatar        String
+  avatar        String?
   favoriteBooks Book[]
   reviews       Review[]
   isAdmin       Boolean  @default(false)
 }
 
 model Author {
-  id         String   @id @default(uuid())
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @default(now())
-  first_name String
-  last_name  String
-  bio        String
-  avatar     String
-  works      Book[]
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  firstName String
+  lastName  String
+  bio       String
+  avatar    String?
+  works     Book[]
 }
 
 model Book {
   id         String   @id @default(uuid())
   createdAt  DateTime @default(now())
-  updatedAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
   title      String
-  summary    String
+  summary    String   @db.VarChar(512)
   imgUrl     String
-  rating     Int      @default(0)
+  rating     Float    @default(0.0)
   pageNumber Int
   authors    Author[]
   likedBy    User[]
@@ -56,7 +56,7 @@ model Book {
 model Review {
   id        String   @id @default(uuid())
   createdAt DateTime @default(now())
-  updatedAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
   vote      Int
   body      String
   book      Book     @relation(fields: [bookId], references: [id])
