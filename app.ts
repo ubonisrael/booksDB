@@ -6,6 +6,7 @@ import { route as reviewsRoute} from "./routes/reviews/review";
 import { route as usersRoute} from "./routes/users/user";
 import { route as authRoute } from "./routes/auth/auth";
 import { errorHandlerMiddleware } from "./middleware/error_handler";
+import { authHandlerMiddleware } from "./middleware/auth_handler";
 
 dotenv.config();
 
@@ -17,12 +18,11 @@ app.use(express.json())
 app.get("/", (req, res) => {
   res.send("Typescript+Express server");
 });
-
 app.use('/api/v1/auth', authRoute)
-app.use('/api/v1/authors', authorsRoute)
-app.use('/api/v1/books', booksRoute)
-app.use('/api/v1/reviews', reviewsRoute)
-app.use('/api/v1/users', usersRoute)
+app.use('/api/v1/authors', authHandlerMiddleware, authorsRoute)
+app.use('/api/v1/books', authHandlerMiddleware, booksRoute)
+app.use('/api/v1/reviews', authHandlerMiddleware, reviewsRoute)
+app.use('/api/v1/users', authHandlerMiddleware, usersRoute)
 
 app.use(errorHandlerMiddleware)
 
