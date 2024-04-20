@@ -48,7 +48,7 @@ export const createAuthor = async (
     if (!lastName) throw new BadRequestError("Please input last name");
     if (!bio) throw new BadRequestError("Please input bio");
 
-    const { error } = authorSchema.validate({
+    const { error, value } = authorSchema.validate({
       firstName,
       lastName,
       bio,
@@ -58,7 +58,7 @@ export const createAuthor = async (
     if (error) throw new BadRequestError(error.message);
 
     const author = await prisma.author.create({
-      data: req.body,
+      data: value,
     });
     res.status(StatusCodes.CREATED).json({ author });
   } catch (e) {
@@ -76,7 +76,7 @@ export const updateAuthor = async (
       if (x in req.body) delete req.body[x];
     }
 
-    const { error } = authorSchema.validate(req.body);
+    const { error, value } = authorSchema.validate(req.body);
 
     if (error) throw new BadRequestError(error.message);
 
@@ -84,7 +84,7 @@ export const updateAuthor = async (
       where: {
         id: req.params.id,
       },
-      data: req.body,
+      data: value,
     });
     res.status(StatusCodes.OK).json({ data: author });
   } catch (e) {
