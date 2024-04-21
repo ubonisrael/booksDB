@@ -20,7 +20,7 @@ export const authHandlerMiddleware = (
         // attach user info to routes
         req.user = {userId: payload.id, username: payload.username, isAdmin: payload.admin}
         next()
-    } catch (e) {
+    } catch (e) {        
         throw new UnauthenticatedError('Auth invalid')
     }
   }
