@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { createAuthor, deleteAuthor, getAllAuthors, getAuthor, updateAuthor } from "../../controlers/authors/authors";
+import { createAuthor, deleteAuthor, getAllAuthors, getAuthor, updateAuthor } from "../../controllers/authors/authors";
 
 export const route = Router()
 
