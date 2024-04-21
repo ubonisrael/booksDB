@@ -1,6 +1,6 @@
 import Joi from "joi";
 
-export const forbiddenAttr = ['id', 'createdAt', 'updatedAt']
+export const forbiddenAttr = ["id", "createdAt", "updatedAt"];
 
 export const authorSchema = Joi.object({
   firstName: Joi.string().required(),
@@ -25,4 +25,11 @@ export const userSchema = Joi.object({
     .required(),
   confirmPassword: Joi.ref("password"),
   avatar: Joi.string(),
+});
+
+export const bookSchema = Joi.object({
+  title: Joi.string().required(),
+  summary: Joi.string().min(10).required(),
+  imgUrl: Joi.string(),
+  pageNumber: Joi.number().required(),
 });
