@@ -45,7 +45,7 @@ model Book {
   updatedAt  DateTime @updatedAt
   title      String
   summary    String   @db.VarChar(512)
-  imgUrl     String
+  imgUrl     String?
   rating     Float    @default(0.0)
   pageNumber Int
   authors    Author[]
