@@ -14,11 +14,15 @@ export const getAllUsers = async (
   next: NextFunction
 ) => {
   // only admins should access this route
-  if (!req.user?.isAdmin)
-    throw new UnauthenticatedError("Cannot access this route. Admins only");
-
-  const users = (await prisma.user.findMany()).sort();
-  res.status(StatusCodes.OK).json({ users });
+  try {
+    if (!req.user?.isAdmin)
+      throw new UnauthenticatedError("Cannot access this route.");
+  
+    const users = (await prisma.user.findMany()).sort();
+    res.status(StatusCodes.OK).json({ users });
+  } catch (e) {
+    next(e)
+  }
 };
 
 export const Login = async (
@@ -134,7 +138,7 @@ export const updateUser = async (
   try {
     // only user should access this route
     if (req.params.id != req.user?.userId)
-      throw new UnauthenticatedError("Cannot access this route.");
+      throw new UnauthenticatedError("Action unauthorized.");
 
     for (const x of forbiddenAttr) {
       if (x in req.body) delete req.body[x];
@@ -168,7 +172,7 @@ export const deleteUser = async (
   try {
     // only admins or user should access this route
     if (!req.user?.isAdmin || req.user?.userId != req.params.id)
-      throw new UnauthenticatedError("Cannot access this route.");
+      throw new UnauthenticatedError("Action unauthorized.");
     const user = await prisma.user.delete({
       where: {
         id: req.params.id,

@@ -1,26 +1,123 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
+import { prisma } from "../../db/client";
+import { StatusCodes } from "http-status-codes";
+import NotFoundError from "../../errors/not_found";
+import BadRequestError from "../../errors/bad_request";
+import { bookSchema, forbiddenAttr } from "../../schema/validationSchema";
 
 
-export const getAllBooks = async (req: Request, res: Response) => {
-    // const authors = (await prisma.author.findMany()).sort()
-    // console.log(authors);
-    // res.statusCode = 200
-    // res.json({data: authors})
-    res.send('Gets all books')
-}
+export const getAllBooks = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
+    const books = (await prisma.book.findMany()).sort();
+    res.status(StatusCodes.OK).json({ data: books });
+  };
 
-export const getBook = async (req: Request, res: Response) => {
-    res.send('Get single book')
-}
+export const getBook = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const book = await prisma.book.findUnique({
+        where: {
+          id: req.params.id,
+        },
+      });
+      if (!book) {
+        throw new NotFoundError(
+          `Book with id-${req.params.id} does not exist.`
+        );
+      }
+      res.status(StatusCodes.OK).json({ book });
+    } catch (e) {
+      next(e);
+    }
+  };
 
-export const createBook = async (req: Request, res: Response) => {
-    res.send('Create book')
-}
+export const createBook = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const {
+        title,
+        summary,
+        imgUrl,
+        pageNumber,
+      } = req.body;
+  
+      if (!title) throw new BadRequestError("Please input title");
+      if (!summary) throw new BadRequestError("Please input summary");
+      if (!pageNumber) throw new BadRequestError("Please input number of pages");
+  
+      const { error, value } = bookSchema.validate({
+        title,
+        summary,
+        imgUrl,
+        pageNumber,
+      });
+  
+      if (error) throw new BadRequestError(error.message);
+  
+      const book = await prisma.book.create({
+        data: value,
+      });
+      res.status(StatusCodes.CREATED).json({ book });
+    } catch (e) {
+      next(e);
+    }
+  };
 
-export const updateBook = async (req: Request, res: Response) => {
-    res.send('Update book')
-}
+export const updateBook = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+      for (const x of forbiddenAttr) {
+        if (x in req.body) delete req.body[x];
+      }
+  
+      const { error, value } = bookSchema.validate(req.body);
+  
+      if (error) throw new BadRequestError(error.message);
+  
+      const book = await prisma.book.update({
+        where: {
+          id: req.params.id,
+        },
+        data: value,
+      });
+      res.status(StatusCodes.OK).json({ data: book });
+    } catch (e) {
+      next(e);
+    }
+  };
+  
 
-export const deleteBook = async (req: Request, res: Response) => {
-    res.send('delete book')
-}
+export const deleteBook = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const book = await prisma.book.delete({
+        where: {
+          id: req.params.id,
+        },
+      });
+      if (!book) {
+        throw new NotFoundError(
+          `Book with id-${req.params.id} does not exist.`
+        );
+      }
+      res.status(StatusCodes.OK).json({});
+    } catch (e) {
+      next(e);
+    }
+  };
+  
