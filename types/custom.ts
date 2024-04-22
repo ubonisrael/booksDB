@@ -4,4 +4,6 @@ export type User = {
   isAdmin: boolean;
 };
 
+export type RouteName = string
+
 export type JwtPayload = { id: string; username: string; admin: boolean };
