@@ -7,6 +7,7 @@ import { route as usersRoute} from "./routes/users/user";
 import { route as authRoute } from "./routes/auth/auth";
 import { errorHandlerMiddleware } from "./middleware/error_handler";
 import { authHandlerMiddleware } from "./middleware/auth_handler";
+import { routeNameHandlerMiddleware } from "./middleware/route_name_handler";
 
 dotenv.config();
 
@@ -18,6 +19,7 @@ app.use(express.json())
 app.get("/", (req, res) => {
   res.send("Typescript+Express server");
 });
+app.use('/api/v1', routeNameHandlerMiddleware)
 app.use('/api/v1/auth', authRoute)
 app.use('/api/v1/authors', authHandlerMiddleware, authorsRoute)
 app.use('/api/v1/books', authHandlerMiddleware, booksRoute)
