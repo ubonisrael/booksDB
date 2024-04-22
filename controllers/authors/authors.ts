@@ -44,9 +44,9 @@ export const createAuthor = async (
   try {
     const { firstName, lastName, bio, avatar } = req.body;
 
-    if (!firstName) throw new BadRequestError("Please input first name");
-    if (!lastName) throw new BadRequestError("Please input last name");
-    if (!bio) throw new BadRequestError("Please input bio");
+    if (!firstName) throw new BadRequestError("First name cannot be empty");
+    if (!lastName) throw new BadRequestError("Last name cannot be empty");
+    if (!bio) throw new BadRequestError("Bio cannot be empty");
 
     const { error, value } = authorSchema.validate({
       firstName,

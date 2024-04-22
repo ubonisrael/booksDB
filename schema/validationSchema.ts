@@ -33,3 +33,11 @@ export const bookSchema = Joi.object({
   imgUrl: Joi.string(),
   pageNumber: Joi.number().required(),
 });
+
+
+export const reviewSchema = Joi.object({
+  vote: Joi.number().min(0).max(10).required(),
+  body: Joi.string().min(10).required(),
+  bookId: Joi.string().required(),
+  authorId: Joi.string().required()
+})
