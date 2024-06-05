@@ -41,7 +41,7 @@ export const authHandlerMiddleware = (
 
     // for author and book routes, only GET methods should be available to non-admin users
     if (req.method != "GET" && (req.route == "authors" || req.route == "books"))
-      throw new UnauthenticatedError("Cannot access this route");
+      throw new UnauthenticatedError("User unauthorized to perform this action");
   }
   next();
 };
