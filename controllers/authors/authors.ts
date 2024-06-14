@@ -10,8 +10,26 @@ export const getAllAuthors = async (
   res: Response,
   next: NextFunction
 ) => {
-  const authors = (await prisma.author.findMany()).sort();
-  res.status(StatusCodes.OK).json({ data: authors });
+  // added support for pagination, filtering (limit, offset)
+  const pageNumber = Number(req.query["page"]) || 1;
+  const limit = Number(req.query["limit"]) || 10;
+  const skip = (pageNumber - 1) * limit;
+
+  const authors = (
+    await prisma.author.findMany({
+      where: {
+        firstName: {
+          search: req.query["search"] ? `${req.query["search"]}` : undefined,
+        },
+        lastName: {
+          search: req.query["search"] ? `${req.query["search"]}` : undefined,
+        },
+      },
+      skip: skip,
+      take: limit,
+    })
+  ).sort();
+  res.status(StatusCodes.OK).json({ authors, count: authors.length });
 };
 
 export const getAuthor = async (
@@ -24,6 +42,9 @@ export const getAuthor = async (
       where: {
         id: req.params.id,
       },
+      include: {
+        works: true
+      }
     });
     if (!author) {
       throw new NotFoundError(
@@ -86,7 +107,7 @@ export const updateAuthor = async (
       },
       data: value,
     });
-    res.status(StatusCodes.OK).json({ data: author });
+    res.status(StatusCodes.OK).json({ author });
   } catch (e) {
     next(e);
   }
