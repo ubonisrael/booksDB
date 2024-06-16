@@ -8,24 +8,8 @@ export const authHandlerMiddleware = (
   res: Response,
   next: NextFunction
 ) => {
-  // check header
-  const authHeader = req.headers.authorization;
-
-  if (!authHeader || !authHeader.startsWith("Bearer "))
-    throw new UnauthenticatedError("Auth invalid");
-
-  const authToken = authHeader.split(" ")[1];
-
-  const payload = jwt.verify(
-    authToken,
-    process.env.JWT_SECRET as string
-  ) as JwtPayload;
-  // attach user info to routes
-  req.user = {
-    userId: payload.id,
-    username: payload.username,
-    isAdmin: payload.admin,
-  };
+  // check header and return user info if available
+  req.user = jwtHandler(req)
 
   if (!req.user?.isAdmin) {
     // user routes should only be available to admins
@@ -41,7 +25,31 @@ export const authHandlerMiddleware = (
 
     // for author and book routes, only GET methods should be available to non-admin users
     if (req.method != "GET" && (req.route == "authors" || req.route == "books"))
-      throw new UnauthenticatedError("User unauthorized to perform this action");
+      throw new UnauthenticatedError(
+        "User unauthorized to perform this action"
+      );
   }
   next();
+};
+
+// checks the request payload for authorization header
+// return user information if available
+export const jwtHandler = (req: Request) => {
+  const authHeader = req.headers.authorization;
+
+  if (!authHeader || !authHeader.startsWith("Bearer "))
+    throw new UnauthenticatedError("Auth invalid");
+
+  const authToken = authHeader.split(" ")[1];
+
+  const payload = jwt.verify(
+    authToken,
+    process.env.JWT_SECRET as string
+  ) as JwtPayload;
+  // attach user info to routes
+  return {
+    userId: payload.id,
+    username: payload.username,
+    isAdmin: payload.admin,
+  };
 };
