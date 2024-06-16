@@ -1,6 +1,6 @@
 import Joi from "joi";
 
-export const forbiddenAttr = ["id", "createdAt", "updatedAt"];
+export const forbiddenAttr = ["id", "createdAt", "updatedAt", "password"];
 
 export const authorSchema = Joi.object({
   firstName: Joi.string().required(),
@@ -31,11 +31,24 @@ export const updateFavoriteSchema = Joi.object({
   bookId: Joi.string().required(),
 });
 
+export const updatePasswordSchema = Joi.object({
+  oldPassword: Joi.string().required(),
+  newPassword: Joi.string()
+    .regex(
+      new RegExp(
+        "^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$"
+      )
+    )
+    .required(),
+  confirmPassword: Joi.ref("newPassword"),
+});
+
 export const bookSchema = Joi.object({
   title: Joi.string().required(),
   summary: Joi.string().min(10).required(),
   imgUrl: Joi.string(),
   pageNumber: Joi.number().required(),
+  authorIds: Joi.array().items(Joi.string()).min(1).required(),
 });
 
 export const reviewSchema = Joi.object({
