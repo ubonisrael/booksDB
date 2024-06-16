@@ -14,16 +14,18 @@ export const getAllBooks = async (
   const pageNumber = Number(req.query["page"]) || 1;
   const limit = Number(req.query["limit"]) || 10;
   const skip = (pageNumber - 1) * limit;
-  const searchRegex = new RegExp(`${req.query["search"] || ""}`, "gi");
 
   const books = (
     await prisma.book.findMany({
+      where: {
+        title: {
+          search: req.query["search"] ? `${req.query["search"]}` : undefined,
+        },
+      },
       skip: skip,
       take: limit,
     })
-  )
-    .sort()
-    .filter((book) => searchRegex.test(book.title));
+  ).sort();
 
   res.status(StatusCodes.OK).json({ books, count: books.length });
 };
@@ -60,23 +62,34 @@ export const createBook = async (
   next: NextFunction
 ) => {
   try {
-    const { title, summary, imgUrl, pageNumber } = req.body;
+    const { title, summary, imgUrl, pageNumber, authorIds } = req.body;
 
     if (!title) throw new BadRequestError("Please input title");
     if (!summary) throw new BadRequestError("Please input summary");
     if (!pageNumber) throw new BadRequestError("Please input number of pages");
+    if (!authorIds || authorIds.length <= 0)
+      throw new BadRequestError("Please input the ID(s) of the author(s)");
 
     const { error, value } = bookSchema.validate({
       title,
       summary,
       imgUrl,
       pageNumber,
+      authorIds,
     });
 
     if (error) throw new BadRequestError(error.message);
 
+    const authors = value.authorIds.map((id: string) => ({ id }));
+    delete value.authorIds;
+
     const book = await prisma.book.create({
-      data: value,
+      data: {
+        ...value,
+        authors: {
+          connect: authors,
+        },
+      },
     });
     res.status(StatusCodes.CREATED).json({ book });
   } catch (e) {
@@ -98,11 +111,20 @@ export const updateBook = async (
 
     if (error) throw new BadRequestError(error.message);
 
+    const authors = value.authorIds.map((id: string) => ({ id }));
+    delete value.authorIds;
+
     const book = await prisma.book.update({
       where: {
         id: req.params.id,
       },
-      data: value,
+      data: {
+        ...value,
+        authors: {
+          set: [],
+          connect: authors
+        },
+      },
     });
 
     res.status(StatusCodes.OK).json({ book });
