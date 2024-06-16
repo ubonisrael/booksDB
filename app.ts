@@ -29,5 +29,5 @@ app.use('/api/v1/users', authHandlerMiddleware, usersRoute)
 app.use(errorHandlerMiddleware)
 
 app.listen(port, () => {
-  console.log(`🚀 Server is listening on localhost:${port}`);
+  console.log(`Server launched🚀🚀🚀\nListening on localhost:${port}`);
 });
