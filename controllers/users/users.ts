@@ -5,12 +5,14 @@ import { StatusCodes } from "http-status-codes";
 import {
   forbiddenAttr,
   updateFavoriteSchema,
+  updatePasswordSchema,
   userSchema,
 } from "../../schema/validationSchema";
 import jwt from "jsonwebtoken";
 import BadRequestError from "../../errors/bad_request";
 import UnauthenticatedError from "../../errors/auth_error";
 import NotFoundError from "../../errors/not_found";
+import { jwtHandler } from "../../middleware/auth_handler";
 
 export const getAllUsers = async (
   req: Request,
@@ -22,20 +24,23 @@ export const getAllUsers = async (
     const pageNumber = Number(req.query["page"]) || 1;
     const limit = Number(req.query["limit"]) || 10;
     const skip = (pageNumber - 1) * limit;
-    const searchRegex = new RegExp(`${req.query["search"] || ""}`, "gi");
     const users = (
       await prisma.user.findMany({
+        where: {
+          username: {
+            search: req.query["search"] ? `${req.query["search"]}` : undefined,
+          },
+          firstName: {
+            search: req.query["search"] ? `${req.query["search"]}` : undefined,
+          },
+          lastName: {
+            search: req.query["search"] ? `${req.query["search"]}` : undefined,
+          },
+        },
         skip: skip,
         take: limit,
       })
-    )
-      .sort()
-      .filter(
-        (us) =>
-          searchRegex.test(us.firstName) ||
-          searchRegex.test(us.lastName) ||
-          searchRegex.test(us.username)
-      );
+    ).sort();
     res.status(StatusCodes.OK).json({ users, count: users.length });
   } catch (e) {
     next(e);
@@ -125,7 +130,6 @@ export const createUser = async (
   }
 };
 
-// *** CHANGE TO UPDATE PASSWORD LATER ?? Or add password update functionality
 export const updateUser = async (
   req: Request,
   res: Response,
@@ -156,6 +160,54 @@ export const updateUser = async (
   }
 };
 
+// added password update functionality == DONE
+export const changePassword = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { userId } = jwtHandler(req);
+    const { oldPassword, newPassword, confirmPassword } = req.body;
+
+    const { error, value } = updatePasswordSchema.validate({
+      oldPassword,
+      newPassword,
+      confirmPassword,
+    });
+
+    if (error) throw new BadRequestError(error.message);
+
+    let user = await prisma.user.findUnique({
+      where: {
+        id: userId,
+      },
+    });
+
+    if (!user) throw new UnauthenticatedError("Invalid credentials");
+
+    const isPasswordCorrect = await compare(value.oldPassword, user.password);
+    if (!isPasswordCorrect)
+      throw new UnauthenticatedError("Invalid credentials");
+
+    const salt = await genSalt();
+    const newPasswordHash = await hash(value.newPassword, salt);
+
+    user = await prisma.user.update({
+      where: {
+        id: userId,
+      },
+      data: {
+        password: newPasswordHash,
+      },
+    });
+
+    res.status(StatusCodes.OK).json({ user });
+  } catch (e) {
+    next(e);
+  }
+};
+
 export const deleteUser = async (
   req: Request,
   res: Response,
@@ -166,13 +218,13 @@ export const deleteUser = async (
       where: {
         authorId: req.params.id,
       },
-    })
+    });
     const deleteUser = prisma.user.delete({
       where: {
         id: req.params.id,
       },
     });
-    await prisma.$transaction([deleteReviews, deleteUser])
+    await prisma.$transaction([deleteReviews, deleteUser]);
     res.status(StatusCodes.OK).json({ status: "success" });
   } catch (e) {
     next(e);
@@ -255,9 +307,11 @@ export const removeBookFromFavorites = async (
       },
       data: {
         favoriteBooks: {
-          delete: {
-            id: value.bookId,
-          },
+          disconnect: [
+            {
+              id: value.bookId,
+            },
+          ],
         },
       },
     });
