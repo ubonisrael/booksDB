@@ -5,7 +5,7 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
   previewFeatures = ["fullTextSearch", "fullTextIndex"]
 }
 
@@ -15,31 +15,31 @@ datasource db {
 }
 
 model User {
-  id            String   @id @default(uuid())
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  email         String   @unique
-  username      String   @unique
+  id            String               @id @default(uuid())
+  createdAt     DateTime             @default(now())
+  updatedAt     DateTime             @updatedAt
+  email         String               @unique
+  username      String               @unique
   firstName     String
   lastName      String
   password      String
   avatar        String?
-  favoriteBooks Book[]
+  favoriteBooks UsersFavoriteBooks[]
   reviews       Review[]
-  isAdmin       Boolean  @default(false)
+  isAdmin       Boolean              @default(false)
 
   @@fulltext([username])
 }
 
 model Author {
-  id        String   @id @default(uuid())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id        String           @id @default(uuid())
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
   firstName String
   lastName  String
   bio       String
   avatar    String?
-  works     Book[]
+  works     AuthorsOfBooks[]
 
   @@fulltext([firstName])
   @@fulltext([lastName])
@@ -47,19 +47,41 @@ model Author {
 }
 
 model Book {
-  id         String   @id @default(uuid())
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  id         String               @id @default(uuid())
+  createdAt  DateTime             @default(now())
+  updatedAt  DateTime             @updatedAt
   title      String
-  summary    String   @db.VarChar(512)
+  summary    String               @db.VarChar(512)
   imgUrl     String?
-  rating     Float    @default(0.0)
+  rating     Float                @default(0.0)
   pageNumber Int
-  authors    Author[]
-  likedBy    User[]
+  authors    AuthorsOfBooks[]
+  likedBy    UsersFavoriteBooks[]
   reviews    Review[]
 
   @@fulltext([title])
+}
+
+model AuthorsOfBooks {
+  author    Author   @relation(fields: [authorId], references: [id])
+  authorId  String
+  book      Book     @relation(fields: [bookId], references: [id])
+  bookId    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@id([authorId, bookId])
+}
+
+model UsersFavoriteBooks {
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  book      Book     @relation(fields: [bookId], references: [id])
+  bookId    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@id([userId, bookId])
 }
 
 model Review {
