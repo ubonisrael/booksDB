@@ -12,6 +12,9 @@ export const errorHandlerMiddleware = (
   res: Response,
   next: NextFunction
 ) => {
+  // console.log(err);
+  // console.log(err.name);
+  
 
   const customError = {
     statusCode: err.statusCode || StatusCodes.INTERNAL_SERVER_ERROR,
@@ -24,7 +27,18 @@ export const errorHandlerMiddleware = (
   }
   if (err instanceof PrismaClientKnownRequestError) {
     customError.statusCode = StatusCodes.BAD_REQUEST;
-    customError.message = "Record to process not found.";
+    if (err.code === 'P2002' && err.meta) {
+      if (err.meta.target === 'User_email_key') {
+        customError.message = 'Email already in use'
+      }
+      if (err.meta.target === 'User_username_key') {
+        customError.message = 'Username already taken'
+      }
+    } else if (err.code === 'P2025' && err.meta) {
+      customError.message = `${err.meta.cause}`
+    } else {
+      customError.message = "Record to process not found.";
+    }
   }
 
   return res
