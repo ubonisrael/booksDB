@@ -119,16 +119,21 @@ export const deleteAuthor = async (
   next: NextFunction
 ) => {
   try {
-    const author = await prisma.author.delete({
-      where: {
-        id: req.params.id,
-      },
-    });
-    if (!author) {
-      throw new NotFoundError(
-        `Author with id-${req.params.id} does not exist.`
-      );
-    }
+    await prisma.$transaction(async (prisma) => {
+      // disconnect all book records associated with this author
+      await prisma.authorsOfBooks.deleteMany({
+        where: {
+          authorId: req.params.id
+        }
+      })
+      // finally remove author from db
+      await prisma.author.delete({
+        where: {
+          id: req.params.id,
+        },
+      });
+    })
+
     res.status(StatusCodes.OK).json({});
   } catch (e) {
     next(e);
