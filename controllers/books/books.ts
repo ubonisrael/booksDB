@@ -80,14 +80,14 @@ export const createBook = async (
 
     if (error) throw new BadRequestError(error.message);
 
-    const authors = value.authorIds.map((id: string) => ({ id }));
+    const authors = value.authorIds.map((id: string) => ({ author: { connect: { id } } }));
     delete value.authorIds;
 
     const book = await prisma.book.create({
       data: {
         ...value,
         authors: {
-          connect: authors,
+          create: authors,
         },
       },
     });
@@ -111,7 +111,7 @@ export const updateBook = async (
 
     if (error) throw new BadRequestError(error.message);
 
-    const authors = value.authorIds.map((id: string) => ({ id }));
+    const authorsOfBooks = value.authorIds.map((id: string) => ({ authorId: id, bookId: req.params.id }));
     delete value.authorIds;
 
     const book = await prisma.book.update({
@@ -120,12 +120,21 @@ export const updateBook = async (
       },
       data: {
         ...value,
-        authors: {
-          set: [],
-          connect: authors
-        },
       },
     });
+    await prisma.$transaction(async (prisma) => {
+
+      await prisma.authorsOfBooks.deleteMany({
+        where: {
+          bookId: book.id
+        }
+      })
+      await prisma.authorsOfBooks.createMany({
+        data: authorsOfBooks
+      })
+
+      return book
+    })
 
     res.status(StatusCodes.OK).json({ book });
   } catch (e) {
@@ -139,14 +148,27 @@ export const deleteBook = async (
   next: NextFunction
 ) => {
   try {
-    const book = await prisma.book.delete({
-      where: {
-        id: req.params.id,
-      },
-    });
-    if (!book) {
-      throw new NotFoundError(`Book with id-${req.params.id} does not exist.`);
-    }
+    await prisma.$transaction(async (prisma) => {
+      // disconnect all associated records
+      await prisma.authorsOfBooks.deleteMany({
+        where: {
+          bookId: req.params.id
+        }
+      })
+      await prisma.usersFavoriteBooks.deleteMany({
+        where: {
+          bookId: req.params.id
+        }
+      })
+
+      // finally, delete book
+      await prisma.book.delete({
+        where: {
+          id: req.params.id,
+        },
+      });
+    })
+
     res.status(StatusCodes.OK).json({ status: "success" });
   } catch (e) {
     next(e);
