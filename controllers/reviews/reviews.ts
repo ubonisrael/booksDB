@@ -39,8 +39,8 @@ export const getReview = async (
       },
       include: {
         author: true,
-        book: true
-      }
+        book: true,
+      },
     });
     if (!review) {
       throw new NotFoundError(
@@ -80,7 +80,25 @@ export const createReview = async (
     if (error) throw new BadRequestError(error.message);
 
     // should a user be able to have multiple reviews on a particular book?
-    // decision - pending
+    // decision - no
+    const book = await prisma.book.findUnique({
+      where: {
+        id: value.bookId,
+      },
+      include: {
+        reviews: true,
+      },
+    });
+
+    if (book) {
+      for (const review of book.reviews) {
+        if (review.authorId === value.authorId) {
+          throw new BadRequestError(
+            "Cannot have more than one review of a book at a time"
+          );
+        }
+      }
+    }
 
     const review = await prisma.review.create({
       data: value,
@@ -130,17 +148,21 @@ export const deleteReview = async (
   next: NextFunction
 ) => {
   try {
-    const review = await prisma.review.delete({
-      where: {
-        id: req.params.id,
-      },
+    const bookId = await prisma.$transaction(async (prisma) => {
+      const review = await prisma.review.delete({
+        where: {
+          id: req.params.id,
+        },
+      });
+      if (!review) {
+        throw new NotFoundError(
+          `Review with id-${req.params.id} does not exist.`
+        );
+      }
+      return review.bookId;
     });
-    if (!review) {
-      throw new NotFoundError(
-        `Review with id-${req.params.id} does not exist.`
-      );
-    }
-    res.status(StatusCodes.OK).json({status: "success" });
+    await updateBookRating(bookId);
+    res.status(StatusCodes.OK).json({ status: "success" });
   } catch (e) {
     next(e);
   }
