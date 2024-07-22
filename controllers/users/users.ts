@@ -214,9 +214,9 @@ export const deleteUser = async (
   next: NextFunction
 ) => {
   try {
-    const deleteReviews = prisma.review.deleteMany({
+    const deleteBooks = prisma.usersFavoriteBooks.deleteMany({
       where: {
-        authorId: req.params.id,
+        userId: req.params.id,
       },
     });
     const deleteUser = prisma.user.delete({
@@ -224,7 +224,7 @@ export const deleteUser = async (
         id: req.params.id,
       },
     });
-    await prisma.$transaction([deleteReviews, deleteUser]);
+    await prisma.$transaction([deleteBooks, deleteUser]);
     res.status(StatusCodes.OK).json({ status: "success" });
   } catch (e) {
     next(e);
