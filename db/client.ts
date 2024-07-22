@@ -11,10 +11,12 @@ export const updateBookRating = async (bookId: string) => {
       reviews: true,
     },
   });
-  
+
   if (book) {
     const newRating =
-      book.reviews.reduce((acc, b) => acc + b.vote, 0) / book.reviews.length;
+      book.reviews.length > 0
+        ? book.reviews.reduce((acc, b) => acc + b.vote, 0) / book.reviews.length
+        : 0;
     await prisma.book.update({
       where: {
         id: book.id,
