@@ -4,7 +4,6 @@ import { compare, genSalt, hash } from "bcryptjs";
 import { StatusCodes } from "http-status-codes";
 import {
   forbiddenAttr,
-  updateFavoriteSchema,
   updatePasswordSchema,
   userSchema,
 } from "../../schema/validationSchema";
@@ -123,8 +122,9 @@ export const createUser = async (
     const user = await prisma.user.create({
       data: value,
     });
+    const user_copy = (({id, email, username}) => ({id, email, username}))(user)
 
-    res.status(StatusCodes.CREATED).json({ user });
+    res.status(StatusCodes.CREATED).json({ created: user_copy });
   } catch (e) {
     next(e);
   }
@@ -250,76 +250,6 @@ export const getUser = async (
       throw new NotFoundError(`user with id-${req.params.id} does not exist.`);
     }
     res.status(StatusCodes.OK).json({ user });
-  } catch (e) {
-    next(e);
-  }
-};
-
-export const addBookToFavorites = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-    const { bookId } = req.body;
-
-    const { error, value } = updateFavoriteSchema.validate({ bookId });
-
-    if (error) throw new BadRequestError(error.message);
-
-    const user = await prisma.user.update({
-      where: {
-        id: req.user?.userId,
-      },
-      data: {
-        favoriteBooks: {
-          set: {
-            id: value.bookId,
-          },
-        },
-      },
-    });
-
-    if (!user)
-      throw new NotFoundError(`User with id-${req.user?.userId} not found.`);
-
-    res.status(StatusCodes.OK).json({ status: "success" });
-  } catch (e) {
-    next(e);
-  }
-};
-
-export const removeBookFromFavorites = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-    const { bookId } = req.body;
-
-    const { error, value } = updateFavoriteSchema.validate({ bookId });
-
-    if (error) throw new BadRequestError(error.message);
-
-    const user = await prisma.user.update({
-      where: {
-        id: req.user?.userId,
-      },
-      data: {
-        favoriteBooks: {
-          disconnect: [
-            {
-              id: value.bookId,
-            },
-          ],
-        },
-      },
-    });
-
-    if (!user)
-      throw new NotFoundError(`User with id-${req.user?.userId} not found.`);
-
-    res.status(StatusCodes.OK).json({ status: "success" });
   } catch (e) {
     next(e);
   }
