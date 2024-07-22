@@ -90,9 +90,9 @@ model Review {
   updatedAt DateTime @updatedAt
   vote      Int
   body      String
-  book      Book     @relation(fields: [bookId], references: [id])
+  book      Book     @relation(fields: [bookId], references: [id], onDelete: Cascade)
   bookId    String
-  author    User     @relation(fields: [authorId], references: [id])
+  author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
   authorId  String
 
   @@fulltext([body])
