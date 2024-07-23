@@ -16,8 +16,13 @@ import { inputSanitizer } from "./middleware/input_sanitizer";
 import { errorHandlerMiddleware } from "./middleware/error_handler";
 import { authHandlerMiddleware } from "./middleware/auth_handler";
 import { routeNameHandlerMiddleware } from "./middleware/route_name_handler";
+// swagger
+import swaggerUI from 'swagger-ui-express'
+import YAML from 'yamljs'
 
 dotenv.config();
+
+const swaggerDocument = YAML.load('./swagger.yaml')
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -36,9 +41,10 @@ app.use(rateLimit({
 }))
 app.use(express.json())
 
-app.get("/", (req, res) => {
-  res.send("Typescript+Express server");
-});
+// app.get("/", (req, res) => {
+//   res.send("<h1>BooksDB</h1><a href='/api_docs'>Documentation</a>");
+// });
+app.use("/", swaggerUI.serve, swaggerUI.setup(swaggerDocument))
 app.use('/api/v1', routeNameHandlerMiddleware)
 app.use('/api/v1/auth', authRoute)
 app.use('/api/v1/authors', authHandlerMiddleware, authorsRoute)

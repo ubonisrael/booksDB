@@ -1,0 +1,747 @@
+openapi: 3.0.0
+info:
+  title: BooksDB API
+  description: API for performing CRUD operations on the BooksDB application.
+  contact: {}
+  version: '1.0'
+servers:
+- url: https://booksdb.onrender.com/api/v1
+  variables: {}
+paths:
+  /auth/register:
+    post:
+      tags:
+      - Authentication
+      summary: Register User
+      description: API endpoint for creating a user.
+      operationId: RegisterUser
+      parameters: []
+      requestBody:
+        description: ''
+        content:
+          application/json:
+            schema:
+              allOf:
+              - $ref: '#/components/schemas/RegisterUserRequest'
+              - example:
+                  username: newUser
+                  firstName: New
+                  lastName: User
+                  password: NotAdmin1$$
+                  confirmPassword: NotAdmin1$$
+                  email: newUser1@example.com
+            example:
+              username: newUser
+              firstName: New
+              lastName: User
+              password: NotAdmin1$$
+              confirmPassword: NotAdmin1$$
+              email: newUser1@example.com
+        required: true
+      responses:
+        '201':
+          description: ''
+          headers: {}
+      deprecated: false
+      security: []
+  /auth/login:
+    post:
+      tags:
+      - Authentication
+      summary: Login
+      description: API endpoint for authenticating a user.
+      operationId: Login
+      parameters: []
+      requestBody:
+        description: ''
+        content:
+          application/json:
+            schema:
+              allOf:
+              - $ref: '#/components/schemas/LoginRequest'
+              - example:
+                  username: newUser
+                  password: NotAdmin1$$
+            example:
+              username: newUser
+              password: NotAdmin1$$
+        required: true
+      responses:
+        '200':
+          description: ''
+          headers: {}
+      deprecated: false
+      security: []
+  /auth/updatePassword:
+    patch:
+      tags:
+      - Authentication
+      summary: Update Password
+      description: API endpoint for changing a user's password.
+      operationId: UpdatePassword
+      parameters: []
+      requestBody:
+        description: ''
+        content:
+          application/json:
+            schema:
+              allOf:
+              - $ref: '#/components/schemas/UpdatePasswordRequest'
+              - example:
+                  oldPassword: Admin1$$
+                  newPassword: Admin2$$
+                  confirmPassword: Admin2$$
+            example:
+              oldPassword: Admin1$$
+              newPassword: Admin2$$
+              confirmPassword: Admin2$$
+        required: true
+      responses:
+        '200':
+          description: ''
+          headers: {}
+      deprecated: false
+  /authors:
+    get:
+      tags:
+      - Authors
+      summary: Get All Authors
+      description: API endpoint for getting all authors.
+      operationId: GetAllAuthors
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          headers: {}
+      deprecated: false
+    post:
+      tags:
+      - Authors
+      summary: Create Author
+      description: API endpoint for creating an author [admin user only].
+      operationId: CreateAuthor
+      parameters: []
+      requestBody:
+        description: ''
+        content:
+          application/json:
+            schema:
+              allOf:
+              - $ref: '#/components/schemas/CreateAuthorRequest'
+              - example:
+                  firstName: Peter
+                  lastName: Parker
+                  bio: With great power comes great responsibility...
+            example:
+              firstName: Peter
+              lastName: Parker
+              bio: With great power comes great responsibility...
+        required: true
+      responses:
+        '201':
+          description: ''
+          headers: {}
+      deprecated: false
+  /authors/{id}:
+    parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: id of the author to get
+    get:
+      tags:
+      - Authors
+      summary: Get Author
+      description: API endpoint for getting an author.
+      operationId: GetAuthor
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          headers: {}
+      deprecated: false
+    patch:
+      tags:
+      - Authors
+      summary: Update Author
+      description: API endpoint for updating an author's profile [admin user only].
+      operationId: UpdateAuthor
+      parameters: []
+      requestBody:
+        description: ''
+        content:
+          application/json:
+            schema:
+              allOf:
+              - $ref: '#/components/schemas/UpdateAuthorRequest'
+              - example:
+                  firstName: Lex
+                  lastName: Luthor
+                  bio: Billionaire, egomaniac...
+            example:
+              firstName: Lex
+              lastName: Luthor
+              bio: Billionaire, egomaniac...
+        required: true
+      responses:
+        '200':
+          description: ''
+          headers: {}
+      deprecated: false
+    delete:
+      tags:
+      - Authors
+      summary: Delete Author
+      description: API endpoint for deleting an author's profile [admin user only].
+      operationId: DeleteAuthor
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          headers: {}
+      deprecated: false
+  /books:
+    get:
+      tags:
+      - Books
+      summary: Get All Books
+      description: API endpoint for retrieving all books.
+      operationId: GetAllBooks
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          headers: {}
+      deprecated: false
+    post:
+      tags:
+      - Books
+      summary: Create Book
+      description: API endpoint for adding a new book [admin user only].
+      operationId: CreateBook
+      parameters: []
+      requestBody:
+        description: ''
+        content:
+          application/json:
+            schema:
+              allOf:
+              - $ref: '#/components/schemas/CreateBookRequest'
+              - example:
+                  title: Fastest Man Alive
+                  summary: Biography of the Scarlet speedster...
+                  pageNumber: '111'
+                  authorIds:
+                  - db52a243-cbe2-4c8a-8528-a3a56beae6ce
+            example:
+              title: Fastest Man Alive
+              summary: Biography of the Scarlet speedster...
+              pageNumber: '111'
+              authorIds:
+              - db52a243-cbe2-4c8a-8528-a3a56beae6ce
+        required: true
+      responses:
+        '201':
+          description: ''
+          headers: {}
+      deprecated: false
+  /books/{id}:
+    parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+        description: id of the book to get
+    get:
+      tags:
+      - Books
+      summary: Get Book
+      description: API endpoint for retrieving a book's information.
+      operationId: GetBook
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          headers: {}
+      deprecated: false
+    patch:
+      tags:
+      - Books
+      summary: Update Book
+      description: API endpoint for updating a book's information [admin user only].
+      operationId: UpdateBook
+      parameters: []
+      requestBody:
+        description: ''
+        content:
+          application/json:
+            schema:
+              allOf:
+              - $ref: '#/components/schemas/UpdateBookRequest'
+              - example:
+                  title: To be deleted 2
+                  summary: To be deleted
+                  pageNumber: '1001'
+                  authorIds:
+                  - 6682fb9b-292e-45ff-9c08-10f28a2d2cbe
+                  - 596fa979-2caa-42e7-bec2-1a26a2cede28
+            example:
+              title: To be deleted 2
+              summary: To be deleted
+              pageNumber: '1001'
+              authorIds:
+              - 6682fb9b-292e-45ff-9c08-10f28a2d2cbe
+              - 596fa979-2caa-42e7-bec2-1a26a2cede28
+        required: true
+      responses:
+        '200':
+          description: ''
+          headers: {}
+      deprecated: false
+    delete:
+      tags:
+      - Books
+      summary: Delete Book
+      description: API endpoint for deleting a book [admin user only].
+      operationId: DeleteBook
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          headers: {}
+      deprecated: false
+  /reviews:
+    get:
+      tags:
+      - Reviews
+      summary: Get All Reviews
+      description: API endpoint for getting all reviews.
+      operationId: GetAllReviews
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          headers: {}
+      deprecated: false
+    post:
+      tags:
+      - Reviews
+      summary: Create Review
+      description: API endpoint for creating a review.
+      operationId: CreateReview
+      parameters: []
+      requestBody:
+        description: ''
+        content:
+          application/json:
+            schema:
+              allOf:
+              - $ref: '#/components/schemas/CreateReviewRequest'
+              - example:
+                  authorId: 131c3506-ff0f-4e6f-85b2-ad2c02305ee9
+                  bookId: 4538db08-0dca-4b23-922e-f7a368847121
+                  vote: 7
+                  body: Just about okay, you definitely won't regert it...
+            example:
+              authorId: 131c3506-ff0f-4e6f-85b2-ad2c02305ee9
+              bookId: 4538db08-0dca-4b23-922e-f7a368847121
+              vote: 7
+              body: Just about okay, you definitely won't regert it...
+        required: true
+      responses:
+        '201':
+          description: ''
+          headers: {}
+      deprecated: false
+  /reviews/{id}:
+    parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+        description: id of the review to get
+    get:
+      tags:
+      - Reviews
+      summary: Get Review
+      description: API endpoint for retrieving a review.
+      operationId: GetReview
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          headers: {}
+      deprecated: false
+    patch:
+      tags:
+      - Reviews
+      summary: Update Review
+      description: API endpoint for updating a review.
+      operationId: UpdateReview
+      parameters: []
+      requestBody:
+        description: ''
+        content:
+          application/json:
+            schema:
+              allOf:
+              - $ref: '#/components/schemas/UpdateReviewRequest'
+              - example:
+                  authorId: 131c3506-ff0f-4e6f-85b2-ad2c02305ee9
+                  bookId: 4538db08-0dca-4b23-922e-f7a368847121
+                  vote: 7
+                  body: Just about okay, you definitely won't regret it...
+            example:
+              authorId: 131c3506-ff0f-4e6f-85b2-ad2c02305ee9
+              bookId: 4538db08-0dca-4b23-922e-f7a368847121
+              vote: 7
+              body: Just about okay, you definitely won't regret it...
+        required: true
+      responses:
+        '200':
+          description: ''
+          headers: {}
+      deprecated: false
+    delete:
+      tags:
+      - Reviews
+      summary: Delete Review
+      description: API endpoint for deleting a review.
+      operationId: DeleteReview
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          headers: {}
+      deprecated: false
+  /users:
+    get:
+      tags:
+      - Users
+      summary: Get All Users
+      description: API endpoint for retrieving all users [admin user only]
+      operationId: GetAllUsers
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          headers: {}
+      deprecated: false
+  /users/{id}:
+    parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+        description: id of the user to get
+    get:
+      tags:
+      - Users
+      summary: Get User
+      description: API endpoint for getting a user's data. Other than a user with administrative privileges, only a user can retrieve their profile.
+      operationId: GetUser
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          headers: {}
+      deprecated: false
+    delete:
+      tags:
+      - Users
+      summary: Delete User
+      description: API endpoint for deleting a user's profile. Other than a user with administrative privileges, only a user can delete their profile.
+      operationId: DeleteUser
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          headers: {}
+      deprecated: false
+    patch:
+      tags:
+      - Users
+      summary: Update User
+      description: API endpoint for updating a user's profile.
+      operationId: UpdateUser
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          headers: {}
+      deprecated: false
+  /favorites:
+    post:
+      tags:
+      - Favorites
+      summary: Add Book To Favorites
+      description: API endpoint for adding a book to a user's favorites.
+      operationId: AddBookToFavorites
+      parameters: []
+      requestBody:
+        description: ''
+        content:
+          application/json:
+            schema:
+              allOf:
+              - $ref: '#/components/schemas/AddBookToFavoritesRequest'
+              - example:
+                  bookId: 21d11d0f-2d4d-4174-b562-44f545e7abae
+            example:
+              bookId: 21d11d0f-2d4d-4174-b562-44f545e7abae
+        required: true
+      responses:
+        '200':
+          description: ''
+          headers: {}
+      deprecated: false
+    delete:
+      tags:
+      - Favorites
+      summary: Remove Book From Favorites
+      description: API endpoint for removing a book from a user's favorites.
+      operationId: RemoveBookFromFavorites
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          headers: {}
+      deprecated: false
+components:
+  schemas:
+    RegisterUserRequest:
+      title: RegisterUserRequest
+      required:
+      - username
+      - firstName
+      - lastName
+      - password
+      - confirmPassword
+      - email
+      type: object
+      properties:
+        username:
+          type: string
+        firstName:
+          type: string
+        lastName:
+          type: string
+        password:
+          type: string
+        confirmPassword:
+          type: string
+        email:
+          type: string
+      example:
+        username: newUser
+        firstName: New
+        lastName: User
+        password: NotAdmin1$$
+        confirmPassword: NotAdmin1$$
+        email: newUser1@example.com
+    LoginRequest:
+      title: LoginRequest
+      required:
+      - username
+      - password
+      type: object
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+      example:
+        username: newUser
+        password: NotAdmin1$$
+    UpdatePasswordRequest:
+      title: UpdatePasswordRequest
+      required:
+      - oldPassword
+      - newPassword
+      - confirmPassword
+      type: object
+      properties:
+        oldPassword:
+          type: string
+        newPassword:
+          type: string
+        confirmPassword:
+          type: string
+      example:
+        oldPassword: Admin1$$
+        newPassword: Admin2$$
+        confirmPassword: Admin2$$
+    CreateAuthorRequest:
+      title: CreateAuthorRequest
+      required:
+      - firstName
+      - lastName
+      - bio
+      type: object
+      properties:
+        firstName:
+          type: string
+        lastName:
+          type: string
+        bio:
+          type: string
+      example:
+        firstName: Peter
+        lastName: Parker
+        bio: With great power comes great responsibility...
+    UpdateAuthorRequest:
+      title: UpdateAuthorRequest
+      required:
+      - firstName
+      - lastName
+      - bio
+      type: object
+      properties:
+        firstName:
+          type: string
+        lastName:
+          type: string
+        bio:
+          type: string
+      example:
+        firstName: Lex
+        lastName: Luthor
+        bio: Billionaire, egomaniac...
+    CreateBookRequest:
+      title: CreateBookRequest
+      required:
+      - title
+      - summary
+      - pageNumber
+      - authorIds
+      type: object
+      properties:
+        title:
+          type: string
+        summary:
+          type: string
+        pageNumber:
+          type: string
+        authorIds:
+          type: array
+          items:
+            type: string
+          description: ''
+      example:
+        title: Fastest Man Alive
+        summary: Biography of the Scarlet speedster...
+        pageNumber: '111'
+        authorIds:
+        - db52a243-cbe2-4c8a-8528-a3a56beae6ce
+    UpdateBookRequest:
+      title: UpdateBookRequest
+      required:
+      - title
+      - summary
+      - pageNumber
+      - authorIds
+      type: object
+      properties:
+        title:
+          type: string
+        summary:
+          type: string
+        pageNumber:
+          type: string
+        authorIds:
+          type: array
+          items:
+            type: string
+          description: ''
+      example:
+        title: To be deleted 2
+        summary: To be deleted
+        pageNumber: '1001'
+        authorIds:
+        - 6682fb9b-292e-45ff-9c08-10f28a2d2cbe
+        - 596fa979-2caa-42e7-bec2-1a26a2cede28
+    CreateReviewRequest:
+      title: CreateReviewRequest
+      required:
+      - authorId
+      - bookId
+      - vote
+      - body
+      type: object
+      properties:
+        authorId:
+          type: string
+        bookId:
+          type: string
+        vote:
+          type: integer
+          format: int32
+        body:
+          type: string
+      example:
+        authorId: 131c3506-ff0f-4e6f-85b2-ad2c02305ee9
+        bookId: 4538db08-0dca-4b23-922e-f7a368847121
+        vote: 7
+        body: Just about okay, you definitely won't regert it...
+    UpdateReviewRequest:
+      title: UpdateReviewRequest
+      required:
+      - authorId
+      - bookId
+      - vote
+      - body
+      type: object
+      properties:
+        authorId:
+          type: string
+        bookId:
+          type: string
+        vote:
+          type: integer
+          format: int32
+        body:
+          type: string
+      example:
+        authorId: 131c3506-ff0f-4e6f-85b2-ad2c02305ee9
+        bookId: 4538db08-0dca-4b23-922e-f7a368847121
+        vote: 7
+        body: Just about okay, you definitely won't regret it...
+    AddBookToFavoritesRequest:
+      title: AddBookToFavoritesRequest
+      required:
+      - bookId
+      type: object
+      properties:
+        bookId:
+          type: string
+      example:
+        bookId: 21d11d0f-2d4d-4174-b562-44f545e7abae
+    RemoveBookFromFavoritesRequest:
+      title: RemoveBookFromFavoritesRequest
+      required:
+      - bookId
+      type: object
+      properties:
+        bookId:
+          type: string
+      example:
+        bookId: 21d11d0f-2d4d-4174-b562-44f545e7abae
+  securitySchemes:
+    bearer:
+      type: http
+      scheme: bearer
+security:
+- bearer: []
+tags:
+- name: Authentication
+  description: API for performing authentication operations.
+- name: Authors
+- name: Books
+- name: Reviews
+- name: Users
+- name: Favorites
