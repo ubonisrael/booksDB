@@ -21,7 +21,11 @@ const input_sanitizer_1 = require("./middleware/input_sanitizer");
 const error_handler_1 = require("./middleware/error_handler");
 const auth_handler_1 = require("./middleware/auth_handler");
 const route_name_handler_1 = require("./middleware/route_name_handler");
+// swagger
+const swagger_ui_express_1 = __importDefault(require("swagger-ui-express"));
+const yamljs_1 = __importDefault(require("yamljs"));
 dotenv_1.default.config();
+const swaggerDocument = yamljs_1.default.load('./swagger.yaml');
 const app = (0, express_1.default)();
 const port = process.env.PORT || 3000;
 app.set('trust proxy', 1 /* number of proxies between user and server */);
@@ -36,9 +40,10 @@ app.use((0, express_rate_limit_1.rateLimit)({
     // store: ... , // Redis, Memcached, etc. See below.
 }));
 app.use(express_1.default.json());
-app.get("/", (req, res) => {
-    res.send("Typescript+Express server");
-});
+// app.get("/", (req, res) => {
+//   res.send("<h1>BooksDB</h1><a href='/api_docs'>Documentation</a>");
+// });
+app.use("/", swagger_ui_express_1.default.serve, swagger_ui_express_1.default.setup(swaggerDocument));
 app.use('/api/v1', route_name_handler_1.routeNameHandlerMiddleware);
 app.use('/api/v1/auth', auth_1.route);
 app.use('/api/v1/authors', auth_handler_1.authHandlerMiddleware, authors_1.route);
