@@ -14,7 +14,7 @@ The backend is built with Node.js and Express, and Prisma ORM is used for databa
 + Prisma with MySQL
 + Testing: Postman
 + Version Control: Git
-+ Hosting: Vercel
++ Hosting: Render
 
 ### CHALLENGES
 
